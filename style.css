@@ -1,0 +1,29 @@
+/* Regras de Design Universal e Acessibilidade */
+.stApp {
+    font-family: 'Inter', 'Roboto', sans-serif;
+}
+
+.header-title {
+    color: #1E3A8A; /* Azul de alto contraste */
+    font-weight: 700;
+}
+
+.tree-container {
+    background-color: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 10px;
+    overflow-x: auto; /* Permite rolagem horizontal se a árvore for muito larga */
+    display: flex;
+    justify-content: center; /* Centraliza a árvore dentro da caixa */
+}
+
+.method-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #334155;
+    border-bottom: 2px solid #CBD5E1;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}

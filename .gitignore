@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Ambientes Virtuais (Conda / Venv)
+venv/
+env/
+.conda/
+.venv/
+
+# Configurações de IDE e SO
+.vscode/
+.DS_Store
+
+# Caches do Streamlit e NLTK
+.streamlit/
+nltk_data/
