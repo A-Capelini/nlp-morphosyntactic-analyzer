@@ -34,5 +34,5 @@ Faz o caminho inverso. Começa pelas palavras da frase (folhas) e tenta agrupá-
 
 **1. Clone o repositório:**
 ```bash
-git clone [https://github.com/SEU_USUARIO/nlp-morphosyntactic-analyzer.git](https://github.com/SEU_USUARIO/nlp-morphosyntactic-analyzer.git)
+git clone https://github.com/SEU_USUARIO/nlp-morphosyntactic-analyzer.git
 cd nlp-morphosyntactic-analyzer
