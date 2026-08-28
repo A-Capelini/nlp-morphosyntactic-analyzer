@@ -1,11 +1,20 @@
 /* Regras de Design Universal e Acessibilidade */
 .stApp {
     font-family: 'Inter', 'Roboto', sans-serif;
+    font-size: 1.05rem;
 }
 
 .header-title {
     color: #1E3A8A; /* Azul de alto contraste */
     font-weight: 700;
+    font-size: 2.25rem;
+    letter-spacing: -0.01em;
+}
+
+.subtitle {
+    color: #475569;
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
 }
 
 .tree-container {
@@ -19,11 +28,66 @@
     justify-content: center; /* Centraliza a árvore dentro da caixa */
 }
 
+/* Destaque de cor por método: reforça visualmente a comparação Top-Down x
+   Bottom-Up. Azul e âmbar foram escolhidos por terem bom contraste e por
+   serem uma combinação segura para daltonismo (evita depender só de
+   vermelho/verde). */
+.tree-container.top-down {
+    border-left: 4px solid #1E3A8A;
+}
+
+.tree-container.bottom-up {
+    border-left: 4px solid #92400E;
+}
+
 .method-title {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     font-weight: 600;
     color: #334155;
     border-bottom: 2px solid #CBD5E1;
     padding-bottom: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
+}
+
+.method-title.top-down {
+    color: #1E3A8A;
+    border-bottom-color: #1E3A8A;
+}
+
+.method-title.bottom-up {
+    color: #92400E;
+    border-bottom-color: #92400E;
+}
+
+/* Explicação curta (o que é / pra que serve / como funciona) de cada
+   método, mostrada logo abaixo do título da coluna. */
+.method-description {
+    font-size: 0.92rem;
+    color: #475569;
+    line-height: 1.55;
+    margin-bottom: 14px;
+}
+
+.method-description strong {
+    color: #334155;
+}
+
+/* Legenda das siglas do log de trace do NLTK (E/M/+ no Top-Down,
+   S/R no Bottom-Up), mostrada dentro do expander antes do log bruto. */
+.log-legend {
+    font-size: 0.85rem;
+    color: #475569;
+    background-color: #F1F5F9;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.log-legend code {
+    background-color: #E2E8F0;
+    color: #0F172A;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
 }
