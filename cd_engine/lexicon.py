@@ -10,53 +10,98 @@ Adicionar um novo verbo suportado é só adicionar uma nova entrada aqui —
 o parser em `parser.py` não precisa ser tocado, desde que o ACT já tenha
 um ramo implementado lá.
 
-O léxico cobre pelo menos dois verbos para cada uma das 9 primitivas
-clássicas de Schank, para que "o professor escolhe a frase na hora" tenha
-uma chance razoável de cair em algo suportado — mas o conjunto continua
-fechado de propósito: é a própria teoria da CD que trabalha com um número
-fechado de primitivas, não uma limitação técnica deste código (ver
+O léxico cobre as 9 primitivas clássicas de Schank com várias entradas cada
+(58 verbos ao todo, incluindo o presente de "deu"/"foi"/"comeu" ao lado do
+passado), para que "o professor escolhe a frase na hora" tenha uma chance
+razoável de cair em algo suportado — mas o conjunto continua fechado de
+propósito: é a própria teoria da CD que trabalha com um número fechado de
+primitivas, não uma limitação técnica deste código (ver
 `parser.UnknownVerbError` para como isso é comunicado na interface).
+
+O que o léxico não cobre é flexão verbal de forma genérica: cada forma
+suportada (ex.: "comeu" e "come") precisa da sua própria entrada aqui —
+não há lematização automática (ex.: "comia", "comendo" continuam fora).
+Isso é intencional: reconhecer qualquer conjugação exigiria um lematizador
+de verdade (ex.: SpaCy), trazendo de volta o mesmo tipo de dependência
+pesada e frágil em deploy que já apareceu com o NLTK na página de parsing.
 """
 
 SEMANTIC_LEXICON = {
     # --- ATRANS: transferência de posse/controle -------------------------
-    "deu":     {"act": "ATRANS", "direction": "gives"},
-    "vendeu":  {"act": "ATRANS", "direction": "gives"},
-    "doou":    {"act": "ATRANS", "direction": "gives"},
-    "comprou": {"act": "ATRANS", "direction": "receives"},
+    "deu":        {"act": "ATRANS", "direction": "gives"},
+    "dá":         {"act": "ATRANS", "direction": "gives"},        # presente de "deu"
+    "vendeu":     {"act": "ATRANS", "direction": "gives"},
+    "doou":       {"act": "ATRANS", "direction": "gives"},
+    "emprestou":  {"act": "ATRANS", "direction": "gives"},
+    "devolveu":   {"act": "ATRANS", "direction": "gives"},
+    "pagou":      {"act": "ATRANS", "direction": "gives"},
+    "comprou":    {"act": "ATRANS", "direction": "receives"},
+    "ganhou":     {"act": "ATRANS", "direction": "receives"},
+    "roubou":     {"act": "ATRANS", "direction": "receives"},
 
     # --- PTRANS: transferência de localização física ---------------------
     "foi":       {"act": "PTRANS", "obj_is_actor": True},
+    "vai":       {"act": "PTRANS", "obj_is_actor": True},        # presente de "foi"
     "andou":     {"act": "PTRANS", "obj_is_actor": True},
+    "correu":    {"act": "PTRANS", "obj_is_actor": True},
+    "voltou":    {"act": "PTRANS", "obj_is_actor": True},
+    "chegou":    {"act": "PTRANS", "obj_is_actor": True},
+    "saiu":      {"act": "PTRANS", "obj_is_actor": True},
     "empurrou":  {"act": "PTRANS", "obj_is_actor": False},
+    "puxou":     {"act": "PTRANS", "obj_is_actor": False},
+    "levou":     {"act": "PTRANS", "obj_is_actor": False},
+    "trouxe":    {"act": "PTRANS", "obj_is_actor": False},
 
     # --- PROPEL: aplicação forçada de energia física ----------------------
     "chutou":      {"act": "PROPEL"},
     "arremessou":  {"act": "PROPEL"},
+    "bateu":       {"act": "PROPEL"},
+    "lançou":      {"act": "PROPEL"},
+    "socou":       {"act": "PROPEL"},
 
     # --- MOVE: movimento de uma parte do próprio corpo --------------------
-    "piscou":    {"act": "MOVE"},
-    "mastigou":  {"act": "MOVE"},
+    "piscou":     {"act": "MOVE"},
+    "mastigou":   {"act": "MOVE"},
+    "acenou":     {"act": "MOVE"},
+    "levantou":   {"act": "MOVE"},
+    "balançou":   {"act": "MOVE"},
 
     # --- GRASP: agarrar/segurar um objeto físico ---------------------------
-    "segurou": {"act": "GRASP"},
-    "pegou":   {"act": "GRASP"},
+    "segurou":  {"act": "GRASP"},
+    "pegou":    {"act": "GRASP"},
+    "agarrou":  {"act": "GRASP"},
+    "apertou":  {"act": "GRASP"},
 
     # --- INGEST: ingestão de algo para o corpo -----------------------------
-    "comeu":  {"act": "INGEST", "infer_dest": "estômago", "instrument_act": "MOVE"},
-    "bebeu":  {"act": "INGEST", "infer_dest": "estômago", "instrument_act": "MOVE"},
+    "comeu":     {"act": "INGEST", "infer_dest": "estômago", "instrument_act": "MOVE"},
+    "come":      {"act": "INGEST", "infer_dest": "estômago", "instrument_act": "MOVE"},  # presente de "comeu"
+    "bebeu":     {"act": "INGEST", "infer_dest": "estômago", "instrument_act": "MOVE"},
+    "engoliu":   {"act": "INGEST", "infer_dest": "estômago", "instrument_act": "MOVE"},
+    "tomou":     {"act": "INGEST", "infer_dest": "estômago", "instrument_act": "MOVE"},
 
     # --- EXPEL: expulsão forçada de fluidos/gases do corpo ------------------
-    "cuspiu":  {"act": "EXPEL"},
-    "chorou":  {"act": "EXPEL"},
+    "cuspiu":    {"act": "EXPEL"},
+    "chorou":    {"act": "EXPEL"},
+    "suou":      {"act": "EXPEL"},
+    "vomitou":   {"act": "EXPEL"},
+    "espirrou":  {"act": "EXPEL"},
 
     # --- MTRANS: transferência de informação mental -------------------------
-    "falou":  {"act": "MTRANS"},
-    "leu":    {"act": "MTRANS"},
+    "falou":       {"act": "MTRANS"},
+    "disse":       {"act": "MTRANS"},
+    "contou":      {"act": "MTRANS"},
+    "perguntou":   {"act": "MTRANS"},
+    "respondeu":   {"act": "MTRANS"},
+    "escreveu":    {"act": "MTRANS"},
+    "leu":         {"act": "MTRANS"},
 
     # --- MBUILD: criação de novos pensamentos a partir de dados --------------
-    "pensou":   {"act": "MBUILD"},
-    "decidiu":  {"act": "MBUILD"},
+    "pensou":    {"act": "MBUILD"},
+    "decidiu":   {"act": "MBUILD"},
+    "concluiu":  {"act": "MBUILD"},
+    "deduziu":   {"act": "MBUILD"},
+    "imaginou":  {"act": "MBUILD"},
+    "lembrou":   {"act": "MBUILD"},
 }
 
 # Artigos e preposições comuns: removidos antes da extração de slots para
