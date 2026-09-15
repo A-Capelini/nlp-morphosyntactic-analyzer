@@ -1,8 +1,8 @@
 import streamlit as st
 
 from cd_engine.frames import ConceptualDependencyFrame
-from cd_engine.lexicon import SEMANTIC_LEXICON, tokenize, verbos_suportados
-from cd_engine.parser import parse_sentence, UnknownVerbError
+from cd_engine.lexicon import content_tokens, tokenize, verbos_por_primitiva, verbos_suportados
+from cd_engine.parser import locate_verb, parse_sentence, UnknownVerbError
 
 st.set_page_config(page_title="Dependência Conceitual · PLN", page_icon="🧠", layout="wide")
 
@@ -17,7 +17,13 @@ def load_css(file_name: str):
 
 load_css("style.css")
 
-EXAMPLES = ["Ana deu livro Maria", "Ana comeu maca", "Pedro foi para Cotia"]
+EXAMPLES = [
+    "Ana deu livro Maria",
+    "Ana comeu maca",
+    "Pedro foi para Cotia",
+    "Pedro chutou a bola para o gol",
+    "Ana decidiu viajar",
+]
 
 
 # ---------------------------------------------------------------------------
@@ -65,12 +71,24 @@ st.markdown(
 
 st.markdown(
     "<div class='cd-legend'>"
-    "<code>ATRANS</code> transferência de posse&nbsp;&nbsp;·&nbsp;&nbsp;"
-    "<code>PTRANS</code> transferência de local&nbsp;&nbsp;·&nbsp;&nbsp;"
-    "<code>INGEST</code> ingestão (com inferência de instrumento)"
+    "A Dependência Conceitual trabalha com um conjunto <strong>fechado</strong> "
+    "de 9 primitivas — esta demonstração cobre todas elas, com pelo menos "
+    "2 verbos cada. Fora dessa lista, a teoria (não o programa) não define "
+    "uma primitiva correspondente."
     "</div>",
     unsafe_allow_html=True,
 )
+
+with st.expander("📋 Ver todos os verbos suportados, por primitiva (ACT)"):
+    grupos = verbos_por_primitiva()
+    cols = st.columns(3)
+    for i, (act, verbos) in enumerate(grupos.items()):
+        with cols[i % 3]:
+            st.markdown(
+                f"<div class='cd-phase' style='margin-bottom:10px;'>"
+                f"<code>{act}</code><br>{', '.join(verbos)}</div>",
+                unsafe_allow_html=True,
+            )
 
 # ---------------------------------------------------------------------------
 # Entrada: exemplo rápido (para demonstração) + frase livre editável
@@ -96,8 +114,9 @@ with col_b:
     )
 
 st.caption(
-    "Verbos suportados no momento: " + ", ".join(verbos_suportados())
-    + ". Novos verbos podem ser adicionados em `cd_engine/lexicon.py`."
+    f"{len(verbos_suportados())} verbos suportados no momento, cobrindo as 9 primitivas "
+    "(lista completa no expansor acima). Novos verbos entram em `cd_engine/lexicon.py`, "
+    "sem precisar tocar no parser."
 )
 
 analisar = st.button("🔎 Analisar frase", type="primary")
@@ -110,25 +129,28 @@ if analisar:
 
     try:
         tokens = tokenize(frase)
-        if len(tokens) < 3:
+        content = content_tokens(tokens)
+        if len(content) < 2:
             raise ValueError(
-                "A frase precisa de ao menos Ator, Verbo e Complemento "
+                "A frase precisa de ao menos um Ator e um Verbo "
                 "(ex.: 'Ana comeu maca')."
             )
-        actor, verbo = tokens[0], tokens[1]
-        regra = SEMANTIC_LEXICON.get(verbo.lower())
-        if regra is None:
+
+        encontrado = locate_verb(content)
+        if encontrado is None:
             raise UnknownVerbError(
-                f"Verbo '{verbo}' fora do léxico semântico. "
-                f"Verbos suportados: {', '.join(verbos_suportados())}."
+                "Nenhum verbo da frase está entre as primitivas suportadas. "
+                f"Verbos disponíveis: {', '.join(verbos_suportados())}."
             )
+        _, verbo, regra = encontrado
 
         st.markdown("#### Passo a passo")
         p1, p2, p3 = st.columns(3)
         with p1:
             st.markdown(
                 "<div class='cd-phase'><strong>1 · Análise Léxica</strong>"
-                f"<br>Tokens: {tokens}</div>",
+                f"<br>Tokens: {tokens}"
+                f"<br><span style='color:#94A3B8;'>sem artigos/preposições: {content}</span></div>",
                 unsafe_allow_html=True,
             )
         with p2:
@@ -152,5 +174,12 @@ if analisar:
         with st.expander("Ver como JSON"):
             st.json(frame.to_dict())
 
-    except (UnknownVerbError, ValueError) as e:
+    except UnknownVerbError as e:
+        st.error(str(e))
+        st.caption(
+            "Isso é esperado, não é um bug: a Dependência Conceitual trabalha com um "
+            "conjunto fechado de primitivas conceituais (Schank, 1972) — fora da lista "
+            "acima, a própria teoria não define uma primitiva correspondente."
+        )
+    except ValueError as e:
         st.error(str(e))

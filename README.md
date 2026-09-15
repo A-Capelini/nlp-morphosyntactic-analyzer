@@ -59,12 +59,14 @@ Implementa o método de **Dependência Conceitual** de Roger Schank (1972): conv
 ### Arquitetura (`cd_engine/`)
 
 * **`frames.py`:** classe `ConceptualDependencyFrame` — estrutura de dados do frame (ator, ACT, objeto, direção, instrumento), com serialização recursiva em `to_dict()`.
-* **`lexicon.py`:** `SEMANTIC_LEXICON` mapeia verbos de superfície (`deu`, `comeu`, `foi`) para primitivas ACT (`ATRANS`, `INGEST`, `PTRANS`) e regras de inferência; `tokenize()` faz a Fase 1 (análise léxica simplificada).
-* **`parser.py`:** `parse_sentence()` implementa as Fases 2–4 (mapeamento ontológico, extração de slots, resolução de inferências) para cada ACT suportado.
+* **`lexicon.py`:** `SEMANTIC_LEXICON` mapeia verbos de superfície para as **9 primitivas ACT** da teoria (`ATRANS`, `PTRANS`, `PROPEL`, `MOVE`, `GRASP`, `INGEST`, `EXPEL`, `MTRANS`, `MBUILD`), com pelo menos 2 verbos cadastrados por primitiva. Também define `STOPWORDS` (artigos/preposições) e `tokenize()`/`content_tokens()` (Fase 1).
+* **`parser.py`:** `locate_verb()` faz a Fase 2 (busca tolerante do verbo, ignorando artigos/preposições e sem exigir posição fixa); `parse_sentence()` implementa as Fases 3–4 (extração de slots e resolução de inferências) para cada uma das 9 primitivas.
 
 ### Tarefa 2 — Demonstração ao vivo
 
-A página `2_🧠_Dependencia_Conceitual.py` permite digitar (ou escolher entre exemplos) uma frase no formato **Ator Verbo Complemento** e ver, em tempo real: os tokens da Fase 1, o ACT mapeado na Fase 2, e o frame final com os slots preenchidos (Fases 3–4) — tanto em uma visualização gráfica quanto em JSON. Verbos fora do léxico retornam um erro amigável em vez de travar a apresentação.
+A página `2_🧠_Dependencia_Conceitual.py` permite digitar (ou escolher entre exemplos) uma frase e ver, em tempo real: os tokens da Fase 1 (com e sem artigos/preposições), o ACT mapeado na Fase 2, e o frame final com os slots preenchidos (Fases 3–4) — tanto em uma visualização gráfica quanto em JSON.
+
+Como "o professor escolhe a frase na hora" é parte do enunciado da Tarefa 2, o parser tolera variações razoáveis de fraseado — "Ana deu livro Maria" e "A Ana deu o livro para a Maria" produzem o mesmo frame — em vez de exigir a ordem rígida Ator-Verbo-Complemento sem nada entre os tokens. O que o parser **não** faz é reconhecer verbos fora do léxico ou conjugações não cadastradas (ex.: "come" em vez de "comeu"): isso é tratado como um erro amigável, com a explicação de que a Dependência Conceitual trabalha com um conjunto fechado de primitivas — uma característica da própria teoria de Schank, não uma limitação deste código.
 
 > Ampliar o vocabulário suportado é só adicionar uma entrada em `cd_engine/lexicon.py` — o parser não precisa ser alterado, desde que o ACT correspondente já tenha um ramo implementado em `parser.py`.
 
