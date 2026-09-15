@@ -13,17 +13,18 @@ def load_css(file_name: str):
 
 load_css("style.css")
 
-st.markdown("<h1 class='header-title'>PLN — Portfólio de Trabalhos</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='header-title'>Processamento de Linguagem Natural (PLN)</h1>", unsafe_allow_html=True)
 st.markdown(
-    "<p class='subtitle'>Disciplina de Processamento de Linguagem Natural — FATEC Cotia. "
-    "Um único app, com uma página independente por trabalho: use o menu à esquerda "
-    "ou os atalhos abaixo para navegar.</p>",
+    "<p class='subtitle'>PLN é a área da Inteligência Artificial que estuda como sistemas "
+    "computacionais analisam, interpretam e geram linguagem humana. Essa análise costuma "
+    "acontecer em camadas — da estrutura sintática de uma frase até o significado por trás "
+    "dela — e os dois projetos abaixo exploram, cada um, uma dessas camadas.</p>",
     unsafe_allow_html=True,
 )
 
 st.markdown(
     "<div class='task-card'>"
-    "<h3>📚 Tarefa 03 — Parsing Sintático</h3>"
+    "<h3>📚 Parsing Sintático (Top-Down vs Bottom-Up)</h3>"
     "<p>Compara os algoritmos Top-Down (Recursive Descent) e Bottom-Up (Shift-Reduce) "
     "sobre um corpus fechado de 3 frases, com árvores sintáticas e log passo a passo.</p>"
     "</div>",
@@ -33,9 +34,9 @@ st.page_link("pages/1_📚_Parsing_Sintatico.py", label="Abrir Parsing Sintátic
 
 st.markdown(
     "<div class='task-card'>"
-    "<h3>🧠 Tarefa 1 e 2 — Dependência Conceitual (CD)</h3>"
-    "<p>Pesquisa sobre o método de Schank (1972) e programa que realiza, ao vivo, a "
-    "análise semântica de uma frase em um frame CD (ATOR → ACT → OBJETO).</p>"
+    "<h3>🧠 Dependência Conceitual (CD)</h3>"
+    "<p>Implementa o método de Schank (1972): converte uma frase, ao vivo, em um frame "
+    "semântico ATOR → ACT → OBJETO, cobrindo as 9 primitivas conceituais da teoria.</p>"
     "</div>",
     unsafe_allow_html=True,
 )
@@ -43,9 +44,9 @@ st.page_link("pages/2_🧠_Dependencia_Conceitual.py", label="Abrir Dependência
 
 st.markdown(
     "<p class='subtitle' style='margin-top:28px;font-size:0.85rem;'>"
-    "Cada trabalho vive em seus próprios arquivos (módulo <code>nlp_engine</code> para a "
-    "Tarefa 03, módulo <code>cd_engine</code> para a Tarefa 1/2) — novas tarefas do "
-    "semestre entram como uma nova página em <code>pages/</code>, sem tocar no código "
-    "dos trabalhos anteriores.</p>",
+    "Cada projeto vive em seus próprios arquivos (módulo <code>nlp_engine</code> para o "
+    "parsing sintático, módulo <code>cd_engine</code> para a Dependência Conceitual) — "
+    "novos trabalhos entram como uma nova página em <code>pages/</code>, sem tocar no "
+    "código dos projetos anteriores.</p>",
     unsafe_allow_html=True,
 )
