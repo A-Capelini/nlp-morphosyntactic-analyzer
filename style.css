@@ -91,3 +91,150 @@
     border-radius: 4px;
     font-weight: 600;
 }
+
+/* ---------------------------------------------------------------------
+   Tarefa 2 — Dependência Conceitual (CD)
+   Reaproveita a mesma paleta das demais páginas (azul primário #1E3A8A,
+   tons de slate para texto/fundo) para manter a identidade visual única
+   do app, mesmo com o motor de análise (cd_engine) totalmente separado
+   do motor de parsing (nlp_engine).
+   --------------------------------------------------------------------- */
+
+.cd-legend {
+    font-size: 0.85rem;
+    color: #475569;
+    background-color: #F1F5F9;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 4px 0 18px 0;
+    line-height: 1.6;
+}
+
+.cd-legend code {
+    background-color: #E2E8F0;
+    color: #0F172A;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.cd-phase {
+    background-color: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 0.88rem;
+    color: #334155;
+    min-height: 84px;
+}
+
+.cd-phase code {
+    background-color: #E2E8F0;
+    color: #1E3A8A;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.cd-frame {
+    background-color: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-left: 4px solid #1E3A8A;
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin-top: 8px;
+}
+
+.cd-frame.nested {
+    margin-top: 12px;
+    margin-left: 8px;
+    background-color: #FFFFFF;
+    border-left: 4px solid #92400E;
+}
+
+.cd-flow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.cd-node {
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-weight: 700;
+    text-align: center;
+    min-width: 90px;
+    position: relative;
+}
+
+.cd-node span {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    opacity: 0.75;
+    margin-top: 2px;
+}
+
+.cd-node-pp {
+    background-color: #FFFFFF;
+    border: 1.5px solid #1E3A8A;
+    color: #0F172A;
+}
+
+.cd-node-act {
+    background-color: #1E3A8A;
+    color: #FFFFFF;
+}
+
+.cd-arrow {
+    font-size: 1.3rem;
+    color: #94A3B8;
+}
+
+.cd-direction {
+    margin-top: 10px;
+    display: flex;
+    gap: 24px;
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.cd-direction strong {
+    color: #334155;
+    margin-right: 4px;
+}
+
+.cd-instrument-label {
+    margin-top: 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #92400E;
+}
+
+/* ---------------------------------------------------------------------
+   Página inicial (app.py) — cards de navegação entre os trabalhos
+   --------------------------------------------------------------------- */
+
+.task-card {
+    background-color: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-bottom: 14px;
+}
+
+.task-card h3 {
+    margin: 0 0 6px 0;
+    color: #1E3A8A;
+    font-size: 1.15rem;
+}
+
+.task-card p {
+    margin: 0;
+    color: #475569;
+    font-size: 0.92rem;
+    line-height: 1.5;
+}

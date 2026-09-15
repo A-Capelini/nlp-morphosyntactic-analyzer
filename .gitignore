@@ -14,6 +14,10 @@ env/
 .vscode/
 .DS_Store
 
-# Caches do Streamlit e NLTK
-.streamlit/
+# Streamlit: mantém .streamlit/config.toml versionado (é o que fixa o tema
+# claro no deploy), ignora apenas segredos/artefatos locais dessa pasta.
+.streamlit/*
+!.streamlit/config.toml
+
+# Cache do NLTK
 nltk_data/
