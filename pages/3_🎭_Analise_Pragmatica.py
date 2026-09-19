@@ -150,7 +150,7 @@ def selo_controle(res: Resultado) -> str:
 # ---------------------------------------------------------------------------
 st.markdown("<h1 class='header-title'>Análise Pragmática (VADER)</h1>", unsafe_allow_html=True)
 st.markdown(
-    "<p class='subtitle'>Exercício de casa — disciplina de PLN, FATEC Cotia. "
+    "<p class='subtitle'>Tarefa 04 — disciplina de PLN, FATEC Cotia. "
     "O VADER consegue captar intenção e contexto, ou lê só o significado literal das palavras?</p>",
     unsafe_allow_html=True,
 )
