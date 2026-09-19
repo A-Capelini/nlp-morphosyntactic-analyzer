@@ -72,8 +72,8 @@ st.markdown(
 st.markdown(
     "<div class='cd-legend'>"
     "A Dependência Conceitual trabalha com um conjunto <strong>fechado</strong> "
-    "de 9 primitivas — esta demonstração cobre todas elas, com pelo menos "
-    "2 verbos cada. Fora dessa lista, a teoria (não o programa) não define "
+    f"de 9 primitivas — esta demonstração cobre todas elas, com {len(verbos_suportados())} "
+    "verbos ao todo. Fora dessa lista, a teoria (não o programa) não define "
     "uma primitiva correspondente."
     "</div>",
     unsafe_allow_html=True,
