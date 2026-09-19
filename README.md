@@ -11,7 +11,8 @@ Aplicação interativa em Python para a disciplina de Processamento de Linguagem
 ├── app.py                              # Página inicial (navegação entre trabalhos)
 ├── pages/
 │   ├── 1_📚_Parsing_Sintatico.py       # Tarefa 03 — usa nlp_engine/
-│   └── 2_🧠_Dependencia_Conceitual.py  # Tarefa 1 e 2 — usa cd_engine/
+│   ├── 2_🧠_Dependencia_Conceitual.py  # Tarefa 1 e 2 — usa cd_engine/
+│   └── 3_🎭_Analise_Pragmatica.py      # Exercício de Pragmática — usa sentiment_engine/
 ├── nlp_engine/                         # Motor da Tarefa 03 (fechado, não é tocado pelos próximos trabalhos)
 │   ├── grammar_rules.py
 │   ├── morphology.py
@@ -21,11 +22,14 @@ Aplicação interativa em Python para a disciplina de Processamento de Linguagem
 │   ├── frames.py                       # Estrutura de dados do frame CD
 │   ├── lexicon.py                      # Léxico semântico + tokenização
 │   └── parser.py                       # parse_sentence(): fases 2–4 da CD
+├── sentiment_engine/                   # Motor do exercício de Pragmática (independente dos demais)
+│   ├── corpus.py                       # Frases do exercício, frases de controle e exemplos livres
+│   └── vader_core.py                   # Carrega o VADER, classifica e lista as palavras reconhecidas
 ├── style.css                           # Identidade visual única do app (todas as páginas)
 └── .streamlit/config.toml              # Tema fixo (claro), versionado no git
 ```
 
-Cada novo trabalho do semestre entra como um novo arquivo em `pages/` (ex.: `pages/3_🔤_Novo_Trabalho.py`) com seu próprio módulo de motor (ex.: `novo_engine/`), sem alterar os arquivos dos trabalhos anteriores. A página inicial (`app.py`) só precisa ganhar um novo card/`st.page_link` apontando para ela.
+Cada novo trabalho do semestre entra como um novo arquivo em `pages/` (ex.: `pages/4_🔤_Novo_Trabalho.py`) com seu próprio módulo de motor (ex.: `novo_engine/`), sem alterar os arquivos dos trabalhos anteriores. A página inicial (`app.py`) só precisa ganhar um novo card/`st.page_link` apontando para ela.
 
 ## 📚 Tarefa 03 — Parsing Sintático (Top-Down vs Bottom-Up)
 
@@ -69,6 +73,28 @@ A página `2_🧠_Dependencia_Conceitual.py` permite digitar (ou escolher entre 
 Como "o professor escolhe a frase na hora" é parte do enunciado da Tarefa 2, o parser tolera variações razoáveis de fraseado — "Ana deu livro Maria" e "A Ana deu o livro para a Maria" produzem o mesmo frame — em vez de exigir a ordem rígida Ator-Verbo-Complemento sem nada entre os tokens. O que o parser **não** faz é reconhecer verbos fora do léxico ou flexões não cadastradas (ex.: "comia"/"comendo" em vez de "comeu"/"come"): isso é tratado como um erro amigável, com a explicação de que a Dependência Conceitual trabalha com um conjunto fechado de primitivas — uma característica da própria teoria de Schank, não uma limitação deste código.
 
 > Ampliar o vocabulário suportado é só adicionar uma entrada em `cd_engine/lexicon.py` — o parser não precisa ser alterado, desde que o ACT correspondente já tenha um ramo implementado em `parser.py`.
+
+## 🎭 Exercício de Pragmática — Análise de sentimentos com VADER
+
+Avalia se o **VADER** (analisador de sentimentos baseado em léxico e regras, do NLTK) consegue captar intenção e contexto em quatro frases emocionalmente ambíguas — *triste parecendo triste*, *triste parecendo alegre* (sarcasmo), *exaltação parecendo triste* e *alegre parecendo alegre* — ou se faz apenas uma leitura literal das palavras.
+
+### Arquitetura (`sentiment_engine/`)
+
+* **`corpus.py`:** as 4 frases (original em português + tradução para o inglês + emoção esperada), as frases de controle (testes de sensibilidade A–D) e os exemplos do campo livre. Trocar uma frase aqui atualiza a página inteira.
+* **`vader_core.py`:** `carregar_analisador()` baixa o léxico do VADER na primeira execução; `analisar()` devolve um `Resultado` (neg/neu/pos/compound, rótulo, palavras reconhecidas e se o acerto foi acidental). Sem HTML e sem Streamlit.
+
+### A página `3_🎭_Analise_Pragmatica.py`
+
+* Mostra cada frase em **português e inglês lado a lado**, com o escore `compound` numa escala visual, as palavras que o VADER realmente reconheceu e se o resultado coincide com a emoção esperada.
+* **Resumo comparativo** das 4 frases e **campo de frase livre** (com exemplos prontos), para testar ao vivo.
+* **Testes de sensibilidade** (controles A–D) que explicam *por que* o VADER acertou ou errou, e um resumo da leitura crítica.
+
+### Decisões técnicas
+
+* **Léxico em inglês:** o VADER não tem português. Em português, as únicas palavras reconhecidas são coincidências com o léxico inglês (ex.: “no” = “não” em inglês, “sob” = “soluçar”); por isso a página sinaliza esses casos como **acertos acidentais**.
+* **Cache:** o analisador é criado uma vez por servidor com `st.cache_resource`, e o `vader_lexicon` é baixado só se ainda não existir.
+* **Segurança:** todo texto digitado pelo usuário passa por `html.escape` antes de entrar no HTML da página.
+* **Sem `transformers` no deploy:** modelos como BERT/RoBERTa (a melhoria sugerida na análise crítica) são pesados demais para o Streamlit Community Cloud e não fazem parte do `requirements.txt`.
 
 ## 🚀 Como Executar Localmente
 

@@ -238,3 +238,226 @@
     font-size: 0.92rem;
     line-height: 1.5;
 }
+
+
+/* ---------------------------------------------------------------------
+   Exercício de Pragmática — Análise de sentimentos com VADER
+   Mesma paleta das demais páginas (azul primário #1E3A8A, tons de slate).
+   Para o sentido do sentimento: teal = positivo e âmbar = negativo (par
+   seguro para daltonismo) e o sentido também vai sempre escrito (símbolo
+   + palavra), nunca só na cor.
+   --------------------------------------------------------------------- */
+
+.sa-legend {
+    font-size: 0.85rem;
+    color: #475569;
+    background-color: #F1F5F9;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 4px 0 18px 0;
+    line-height: 1.6;
+}
+
+.sa-legend code {
+    background-color: #E2E8F0;
+    color: #0F172A;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.sa-expected {
+    font-size: 0.92rem;
+    color: #334155;
+    background-color: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-left: 4px solid #1E3A8A;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 4px 0 16px 0;
+    line-height: 1.5;
+}
+
+.sa-col-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1E3A8A;
+    border-bottom: 2px solid #1E3A8A;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.sa-card {
+    background-color: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-left: 4px solid #475569;
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-top: 8px;
+}
+
+.sa-card.positivo { border-left-color: #0F766E; }
+.sa-card.negativo { border-left-color: #B45309; }
+
+.sa-card-head {
+    margin-bottom: 10px;
+}
+
+.sa-badge {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-right: 10px;
+}
+
+.sa-badge.positivo { background-color: #CCFBF1; color: #134E4A; }
+.sa-badge.negativo { background-color: #FEF3C7; color: #78350F; }
+.sa-badge.neutro   { background-color: #E2E8F0; color: #334155; }
+
+.sa-hit {
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.sa-hit.ok   { color: #134E4A; }
+.sa-hit.miss { color: #7C2D12; }
+.sa-hit.warn { color: #92400E; }
+
+.sa-text {
+    font-size: 0.98rem;
+    color: #0F172A;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.sa-gauge {
+    margin: 4px 0 12px 0;
+}
+
+.sa-gauge-track {
+    position: relative;
+    height: 10px;
+    background-color: #E2E8F0;
+    border-radius: 999px;
+}
+
+.sa-gauge-zero {
+    position: absolute;
+    left: 50%;
+    top: -3px;
+    width: 2px;
+    height: 16px;
+    background-color: #94A3B8;
+}
+
+.sa-gauge-marker {
+    position: absolute;
+    top: -4px;
+    width: 18px;
+    height: 18px;
+    margin-left: -9px;
+    border-radius: 50%;
+    border: 3px solid #FFFFFF;
+    background-color: #475569;
+    box-shadow: 0 0 0 1px #94A3B8;
+}
+
+.sa-gauge-marker.positivo { background-color: #0F766E; }
+.sa-gauge-marker.negativo { background-color: #B45309; }
+
+.sa-gauge-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: #64748B;
+    margin-top: 6px;
+}
+
+.sa-scores {
+    font-size: 0.85rem;
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+.sa-scores span {
+    margin-right: 14px;
+}
+
+.sa-scores strong {
+    color: #334155;
+}
+
+.sa-expected-line {
+    font-size: 0.85rem;
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+.sa-words {
+    font-size: 0.85rem;
+    color: #475569;
+    line-height: 2;
+}
+
+.sa-chip {
+    display: inline-block;
+    padding: 1px 9px;
+    margin: 0 4px 0 4px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.82rem;
+}
+
+.sa-chip.pos { background-color: #CCFBF1; color: #134E4A; }
+.sa-chip.neg { background-color: #FEF3C7; color: #78350F; }
+
+.sa-none {
+    color: #64748B;
+    font-style: italic;
+}
+
+.sa-warning {
+    margin-top: 10px;
+    font-size: 0.82rem;
+    color: #78350F;
+    background-color: #FEF3C7;
+    border-radius: 6px;
+    padding: 8px 12px;
+    line-height: 1.5;
+}
+
+.sa-table-wrap {
+    overflow-x: auto; /* rolagem horizontal em telas estreitas */
+    margin: 4px 0 8px 0;
+}
+
+.sa-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    color: #334155;
+}
+
+.sa-table th {
+    text-align: left;
+    background-color: #F1F5F9;
+    color: #1E3A8A;
+    font-weight: 700;
+    padding: 8px 10px;
+    border-bottom: 2px solid #CBD5E1;
+}
+
+.sa-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #E2E8F0;
+    vertical-align: top;
+    line-height: 1.5;
+}
+
+.sa-muted {
+    color: #64748B;
+    font-size: 0.75rem;
+}
