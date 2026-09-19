@@ -12,7 +12,7 @@ Aplicação interativa em Python para a disciplina de Processamento de Linguagem
 ├── pages/
 │   ├── 1_📚_Parsing_Sintatico.py       # Tarefa 03 — usa nlp_engine/
 │   ├── 2_🧠_Dependencia_Conceitual.py  # Tarefa 1 e 2 — usa cd_engine/
-│   └── 3_🎭_Analise_Pragmatica.py      # Exercício de Pragmática — usa sentiment_engine/
+│   └── 3_🎭_Analise_Pragmatica.py      # Tarefa 04 — Pragmática — usa sentiment_engine/
 ├── nlp_engine/                         # Motor da Tarefa 03 (fechado, não é tocado pelos próximos trabalhos)
 │   ├── grammar_rules.py
 │   ├── morphology.py
@@ -74,7 +74,7 @@ Como "o professor escolhe a frase na hora" é parte do enunciado da Tarefa 2, o 
 
 > Ampliar o vocabulário suportado é só adicionar uma entrada em `cd_engine/lexicon.py` — o parser não precisa ser alterado, desde que o ACT correspondente já tenha um ramo implementado em `parser.py`.
 
-## 🎭 Exercício de Pragmática — Análise de sentimentos com VADER
+## 🎭 Tarefa 04 — Pragmática — Análise de sentimentos com VADER
 
 Avalia se o **VADER** (analisador de sentimentos baseado em léxico e regras, do NLTK) consegue captar intenção e contexto em quatro frases emocionalmente ambíguas — *triste parecendo triste*, *triste parecendo alegre* (sarcasmo), *exaltação parecendo triste* e *alegre parecendo alegre* — ou se faz apenas uma leitura literal das palavras.
 
