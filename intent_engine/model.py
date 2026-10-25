@@ -20,7 +20,11 @@ RAIZ = Path(__file__).resolve().parents[1]
 ARQ_CSV = RAIZ / "data" / "intent_assistant" / "massive_ptbr_subset.csv"
 
 ALVO_PRECISAO = 0.95     # precisão mínima desejada entre as respostas aceitas
-LIMIAR_MANUAL = None     # se quiser forçar um limiar (ex.: 0.40), coloque aqui
+
+# Limiar fixado em 0,30 (25/10): o limiar automático (0,25) deixava passar
+# frases fora do escopo (ex.: "como faço um bolo de chocolate?" = 0,27).
+# Para voltar ao limiar automático da validação, troque por None.
+LIMIAR_MANUAL = 0.30
 
 # Modelo guardado em memória depois do primeiro treino
 _MODELO = None
@@ -85,7 +89,7 @@ def treinar(mostrar=False):
         print("limiar | cobertura | precisão entre aceitas")
         for lim, cob, prec in tabela:
             print(f"{lim:6.2f} | {cob:9.1%} | {prec:9.1%}")
-        print(f"Limiar escolhido: {limiar}")
+        print(f"Limiar em uso: {limiar}")
 
     _MODELO = {"pipeline": pipeline, "limiar": limiar, "tabela": tabela}
     return _MODELO
