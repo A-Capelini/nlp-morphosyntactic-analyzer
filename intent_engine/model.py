@@ -21,10 +21,12 @@ ARQ_CSV = RAIZ / "data" / "intent_assistant" / "massive_ptbr_subset.csv"
 
 ALVO_PRECISAO = 0.95     # precisão mínima desejada entre as respostas aceitas
 
-# Limiar fixado em 0,30 (25/10): o limiar automático (0,25) deixava passar
-# frases fora do escopo (ex.: "como faço um bolo de chocolate?" = 0,27).
+# Limiar fixado em 0,35 (25/10, Etapa 4). Histórico: o limiar automático (0,25)
+# deixava passar frases fora do escopo (ex.: "como faço um bolo de chocolate?" = 0,27);
+# 0,30 ainda aceitava "qual é a raiz quadrada de 144?" (clima, 0,34) nas frases próprias.
+# Escolhido com validação + frases próprias, NUNCA com o split de teste.
 # Para voltar ao limiar automático da validação, troque por None.
-LIMIAR_MANUAL = 0.30
+LIMIAR_MANUAL = 0.35
 
 # Modelo guardado em memória depois do primeiro treino
 _MODELO = None
