@@ -18,7 +18,7 @@ st.markdown(
     "<p class='subtitle'>PLN é a área da Inteligência Artificial que estuda como sistemas "
     "computacionais analisam, interpretam e geram linguagem humana. Essa análise costuma "
     "acontecer em camadas — da estrutura sintática de uma frase até o significado por trás "
-    "dela — e os três projetos abaixo exploram, cada um, uma dessas camadas.</p>",
+    "dela — e os quatro projetos abaixo exploram, cada um, uma dessas camadas.</p>",
     unsafe_allow_html=True,
 )
 
@@ -53,11 +53,24 @@ st.markdown(
 )
 st.page_link("pages/3_🎭_Analise_Pragmatica.py", label="Abrir Análise Pragmática", icon="🎭")
 
+# Card do trabalho "Assistentes Virtuais Inteligentes" (classificação de intenções)
+st.markdown(
+    "<div class='task-card'>"
+    "<h3>🤖 Assistente de Intenções (NLU)</h3>"
+    "<p>Aplicação prática de assistentes virtuais: classifica, em português, a intenção de uma "
+    "frase em 9 domínios (alarmes, clima, casa inteligente etc.) com TF-IDF e Regressão "
+    "Logística, mostra a confiança do modelo e responde \"não entendi\" quando ela é baixa.</p>"
+    "</div>",
+    unsafe_allow_html=True,
+)
+st.page_link("pages/4_🤖_Assistente_Intencoes.py", label="Abrir Assistente de Intenções", icon="🤖")
+
 st.markdown(
     "<p class='subtitle' style='margin-top:28px;font-size:0.85rem;'>"
     "Cada projeto vive em seus próprios arquivos (módulo <code>nlp_engine</code> para o "
     "parsing sintático, módulo <code>cd_engine</code> para a Dependência Conceitual, "
-    "módulo <code>sentiment_engine</code> para a Análise Pragmática) — "
+    "módulo <code>sentiment_engine</code> para a Análise Pragmática, "
+    "módulo <code>intent_engine</code> para o Assistente de Intenções) — "
     "novos trabalhos entram como uma nova página em <code>pages/</code>, sem tocar no "
     "código dos projetos anteriores.</p>",
     unsafe_allow_html=True,
