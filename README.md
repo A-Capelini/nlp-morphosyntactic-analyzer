@@ -38,6 +38,8 @@ Aplicação interativa em Python para a disciplina de Processamento de Linguagem
 │   └── testar_intencoes.py             # Teste no terminal: F1 na validação e frases dentro/fora do escopo
 ├── docs/intent_assistant/
 │   └── PROGRESSO.md                    # Registro de andamento do trabalho do assistente
+├── setup/
+│   └── environment.yml                 # Ambiente conda para rodar localmente (fora da raiz de propósito; ver "Como Executar")
 ├── requirements.txt                    # Dependências do deploy (Streamlit Community Cloud)
 ├── style.css                           # Identidade visual única do app (todas as páginas)
 └── .streamlit/config.toml              # Tema fixo (claro), versionado no git
@@ -185,7 +187,8 @@ O usuário digita uma frase em português (ex.: *"acorde-me às sete da manhã"*
 
 ```bash
 # 1) Baixe o dataset Magurofg/massive-pt-br (Hugging Face) para ~/dados/massive-pt-br
-#    (train.jsonl, validation.jsonl e test.jsonl) e gere o CSV recortado:
+#    (train.jsonl, validation.jsonl e test.jsonl); o huggingface_hub já vem no ambiente conda.
+#    Depois gere o CSV recortado:
 python scripts/prepare_intent_dataset.py
 
 # 2) F1 por classe na validação e teste com frases dentro e fora do escopo:
@@ -204,29 +207,49 @@ MAGUROFG. **massive-pt-br**: localização brasileira do MASSIVE. Hugging Face, 
 
 ## 🚀 Como Executar Localmente
 
+Testado com **Python 3.10** (ambiente conda local) e **Python 3.14** (Streamlit Community Cloud).
+
 **1. Clone o repositório:**
 ```bash
 git clone https://github.com/A-Capelini/nlp-morphosyntactic-analyzer.git
 cd nlp-morphosyntactic-analyzer
 ```
 
-**2. Crie e ative um ambiente virtual (recomendado):**
+### Opção 1 — conda (recomendada)
+
+Os pacotes vêm primeiro do **conda-forge**; o `pip` só entra para o que não existe nos canais conda (hoje, apenas o `svgling`). Tudo está descrito em `setup/environment.yml`:
+
+```bash
+conda env create -f setup/environment.yml
+conda activate nlp-analyzer
+streamlit run app.py
+```
+
+Para atualizar um ambiente já existente depois de mudar o arquivo:
+
+```bash
+conda env update -n nlp-analyzer -f setup/environment.yml --prune
+```
+
+> **Por que o `environment.yml` fica em `setup/` e não na raiz:** o Streamlit Community Cloud usa o primeiro arquivo de dependência que encontra na pasta do `app.py` ou na raiz, com prioridade do `environment.yml` sobre o `requirements.txt`. Em `setup/` ele não é detectado, e o deploy continua usando o `requirements.txt`. Ao mudar uma dependência, atualize os dois arquivos.
+
+### Opção 2 — venv + pip
+
+**2.1. Crie e ative um ambiente virtual:**
 ```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate     # Windows
 ```
 
-> Quem usa **conda** pode criar o ambiente com o conda e instalar primeiro pelo `conda-forge` (`conda install -c conda-forge streamlit nltk scikit-learn pandas unidecode`), recorrendo ao `pip` só para o que não existir lá (ex.: `svgling`, se for o caso).
-
-**3. Instale as dependências:**
+**2.2. Instale as dependências:**
 ```bash
 pip install -r requirements.txt
 ```
 
-**4. Rode a aplicação:**
+**2.3. Rode a aplicação:**
 ```bash
 streamlit run app.py
 ```
 
-A aplicação abre automaticamente em `http://localhost:8501`, com a página inicial listando os trabalhos disponíveis no menu lateral.
+Em qualquer das opções, a aplicação abre automaticamente em `http://localhost:8501`, com a página inicial listando os trabalhos disponíveis no menu lateral.
