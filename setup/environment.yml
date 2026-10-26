@@ -1,0 +1,27 @@
+# Ambiente conda para rodar o app LOCALMENTE.
+# Uso (a partir da raiz do repositório):  conda env create -f setup/environment.yml
+#
+# Este arquivo fica em setup/ DE PROPÓSITO: o Streamlit Community Cloud procura
+# arquivos de dependência na pasta do app.py e na raiz e dá prioridade ao
+# environment.yml sobre o requirements.txt. Em setup/ ele não é detectado, e o
+# deploy continua usando o requirements.txt da raiz.
+# Ao mudar uma dependência, atualize este arquivo E o requirements.txt.
+#
+# Regra de instalação: 1º conda-forge, 2º conda (defaults), 3º pip só se o
+# pacote não existir nos anteriores (hoje: apenas o svgling).
+# Testado com: Python 3.10, streamlit 1.62, nltk 3.10, scikit-learn 1.7, pandas 2.3.
+name: nlp-analyzer
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - streamlit
+  - nltk
+  - scikit-learn
+  - pandas
+  - unidecode
+  - huggingface_hub    # só para baixar o dataset (scripts/prepare_intent_dataset.py); o app não usa
+  - pip:
+      - svgling        # não existe no conda-forge nem no defaults
