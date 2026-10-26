@@ -12,7 +12,8 @@ Aplicação interativa em Python para a disciplina de Processamento de Linguagem
 ├── pages/
 │   ├── 1_📚_Parsing_Sintatico.py       # Tarefa 03 — usa nlp_engine/
 │   ├── 2_🧠_Dependencia_Conceitual.py  # Tarefa 1 e 2 — usa cd_engine/
-│   └── 3_🎭_Analise_Pragmatica.py      # Tarefa 04 — Pragmática — usa sentiment_engine/
+│   ├── 3_🎭_Analise_Pragmatica.py      # Tarefa 04 — Pragmática — usa sentiment_engine/
+│   └── 4_🤖_Assistente_Intencoes.py    # Assistentes Virtuais — classificação de intenções (NLU) — usa intent_engine/
 ├── nlp_engine/                         # Motor da Tarefa 03 (fechado, não é tocado pelos próximos trabalhos)
 │   ├── grammar_rules.py
 │   ├── morphology.py
@@ -25,11 +26,24 @@ Aplicação interativa em Python para a disciplina de Processamento de Linguagem
 ├── sentiment_engine/                   # Motor do exercício de Pragmática (independente dos demais)
 │   ├── corpus.py                       # Frases do exercício, frases de controle e exemplos livres
 │   └── vader_core.py                   # Carrega o VADER, classifica e lista as palavras reconhecidas
+├── intent_engine/                      # Motor do Assistente de Intenções (independente dos demais; sem Streamlit)
+│   ├── preprocess.py                   # Limpeza do texto (a mesma função no treino e na entrada do usuário)
+│   ├── model.py                        # TF-IDF + Regressão Logística, limiar de confiança e prever()
+│   ├── responses.py                    # Nomes de exibição, respostas simuladas e mensagem "não entendi"
+│   └── evaluate.py                     # Avaliação no split de teste e frases próprias
+├── data/intent_assistant/
+│   └── massive_ptbr_subset.csv         # Recorte do MASSIVE pt-BR (versionado; o app não baixa nada)
+├── scripts/
+│   ├── prepare_intent_dataset.py       # Gera o CSV a partir do dataset baixado (uso único)
+│   └── testar_intencoes.py             # Teste no terminal: F1 na validação e frases dentro/fora do escopo
+├── docs/intent_assistant/
+│   └── PROGRESSO.md                    # Registro de andamento do trabalho do assistente
+├── requirements.txt                    # Dependências do deploy (Streamlit Community Cloud)
 ├── style.css                           # Identidade visual única do app (todas as páginas)
 └── .streamlit/config.toml              # Tema fixo (claro), versionado no git
 ```
 
-Cada novo trabalho do semestre entra como um novo arquivo em `pages/` (ex.: `pages/4_🔤_Novo_Trabalho.py`) com seu próprio módulo de motor (ex.: `novo_engine/`), sem alterar os arquivos dos trabalhos anteriores. A página inicial (`app.py`) só precisa ganhar um novo card/`st.page_link` apontando para ela.
+Cada novo trabalho do semestre entra como um novo arquivo em `pages/` (ex.: `pages/5_🔤_Novo_Trabalho.py`) com seu próprio módulo de motor (ex.: `novo_engine/`), sem alterar os arquivos dos trabalhos anteriores. A página inicial (`app.py`) só precisa ganhar um novo card/`st.page_link` apontando para ela.
 
 ## 📚 Tarefa 03 — Parsing Sintático (Top-Down vs Bottom-Up)
 
@@ -96,11 +110,103 @@ Avalia se o **VADER** (analisador de sentimentos baseado em léxico e regras, do
 * **Segurança:** todo texto digitado pelo usuário passa por `html.escape` antes de entrar no HTML da página.
 * **Sem `transformers` no deploy:** modelos como BERT/RoBERTa (a melhoria sugerida na análise crítica) são pesados demais para o Streamlit Community Cloud e não fazem parte do `requirements.txt`.
 
+## 🤖 Assistentes Virtuais Inteligentes — Assistente de Intenções (NLU)
+
+Aplicação prática da apresentação **"Assistentes Virtuais Inteligentes"**, ligada aos slides sobre NLU (slide 3), a evolução de regras para aprendizado de máquina (slides 4-5) e os casos de atendimento ao cliente e casa inteligente (slide 10).
+
+O usuário digita uma frase em português (ex.: *"acorde-me às sete da manhã"*) e o app mostra o **domínio previsto** (Alarmes), a **confiança** do modelo e uma **resposta simulada**. Quando a confiança fica abaixo do limiar (0,35), o assistente responde **"não entendi"**. O assistente **não gera texto, não executa nada de verdade e não é IA agêntica**: cada domínio tem uma resposta fixa, só para demonstrar o que viria depois da etapa de NLU.
+
+### Como funciona
+
+1. **Pré-processamento** (`preprocess.py`): normalização Unicode, minúsculas, remoção de acentos e pontuação, "e-mail" unificado em "email" e stopwords próprias.
+2. **Vetorização:** TF-IDF com unigramas e bigramas.
+3. **Classificação:** Regressão Logística, que devolve uma probabilidade para cada um dos 9 domínios.
+4. **Decisão:** se a maior probabilidade (a *confiança*) é ≥ 0,35, o assistente responde com o domínio previsto; senão, diz "não entendi".
+
+### Dataset
+
+* **MASSIVE pt-BR** (Hugging Face: `Magurofg/massive-pt-br`), licença **CC BY 4.0** — localização para português do Brasil do MASSIVE (Amazon), um benchmark multilíngue de compreensão de linguagem natural para assistentes virtuais.
+* **Tarefa:** classificar por **domínio** (coluna `scenario`), não pelas 60 intenções. Foram escolhidos **9 domínios**: alarmes, clima, reprodução de música e mídia, casa inteligente, calendário, listas, data e hora, notícias e e-mail/contatos.
+* **Recorte versionado:** `data/intent_assistant/massive_ptbr_subset.csv` (9.440 linhas, colunas `texto`, `dominio` e `split`). Divisão pelos splits do próprio dataset: **treino 6.571 / validação 1.115 / teste 1.754** frases, depois de remover duplicatas no treino e frases de validação/teste idênticas às do treino.
+* **O app não baixa nada em execução:** o dataset foi baixado uma vez e recortado por `scripts/prepare_intent_dataset.py`; o CSV resultante fica no repositório.
+
+### Arquitetura (`intent_engine/`)
+
+* **`preprocess.py`:** função `preprocessar()`, a **mesma** no treino e na frase digitada. As stopwords são uma lista própria e curta (sem baixar dados do NLTK, que falha no Streamlit Cloud), mantendo palavras que carregam intenção ("hoje", "amanhã", "não", "para"...). As palavras de ativação do dataset (*olly*, *alexa*, *siri*, *ei*, *hei*) também viram stopwords, para o modelo não usar "alexa" como atalho para casa inteligente.
+* **`model.py`:** `treinar()` ajusta o modelo só com o treino (a validação serve para estudar o limiar); `prever(texto)` devolve `dominio`, `confianca`, `top3` e `entendeu`. Sem Streamlit.
+* **`responses.py`:** nome de exibição e resposta simulada de cada domínio, e a mensagem de "não entendi".
+* **`evaluate.py`:** o **único** lugar que lê o split de teste. Calcula acurácia, F1 macro, relatório por classe, matriz de confusão, erros mais comuns e roda 18 frases próprias (12 dentro do escopo e 6 fora). A página só exibe os resultados.
+
+### A página `4_🤖_Assistente_Intencoes.py`
+
+* **Aba "Assistente":** campo de texto, 6 exemplos clicáveis (um deles fora do escopo), histórico da conversa em `st.session_state` (o mais recente no topo), domínio previsto com nome de exibição, barra de confiança, resposta simulada, top-3 e o aviso de "não entendi".
+* **Aba "Sobre o modelo":** métricas no conjunto de teste, interpretação em texto curto, tabela por classe, matriz de confusão, erros mais comuns, erros de maior confiança e as frases próprias.
+* **Barra lateral:** domínios, dataset, licença, limiar em uso e as limitações.
+* **Cache:** o modelo é treinado uma vez por servidor com `st.cache_resource`, e a avaliação roda uma vez com `st.cache_data`.
+
+### Resultados (conjunto de teste, limiar 0,35)
+
+| Métrica | Valor |
+|---|---|
+| Acurácia | 93,7% (110 erros em 1.754 frases) |
+| F1 macro | 0,929 |
+| Cobertura (frases com confiança ≥ 0,35) | 91,7% |
+| Precisão nas frases aceitas | 96,6% |
+
+| Domínio | F1 | | Domínio | F1 |
+|---|---|---|---|---|
+| E-mail e contatos | 0,974 | | Clima | 0,935 |
+| Reprodução de música e mídia | 0,958 | | Calendário | 0,923 |
+| Alarmes | 0,957 | | Listas | 0,915 |
+| Casa inteligente | 0,949 | | Notícias | 0,904 |
+| | | | Data e hora | 0,842 |
+
+* **Principal confusão:** Calendário × Data e hora (15 frases de calendário previstas como data e hora e 7 no sentido contrário), esperada porque as frases são parecidas ("me diz as horas dos eventos", "hoje é dia de São João"). Data e hora também é a menor classe do treino (4,8%).
+* **Validação × teste:** acurácia 0,934 → 0,937 e F1 macro 0,927 → 0,929, sem sinal de sobreajuste.
+* **18 frases próprias:** 18 de 18 corretas (12 dentro do escopo com confiança mínima de 0,58 e 6 fora do escopo no "não entendi"). Esse resultado **não mede generalização**: o limiar 0,35 foi ajustado olhando uma dessas frases ("qual é a raiz quadrada de 144?", confiança 0,34). A medida honesta é o conjunto de teste.
+
+### Decisões técnicas
+
+* **Classificação por domínio** (9 classes) em vez das 60 intenções: tarefa mais simples, fácil de demonstrar e de explicar.
+* **TF-IDF + Regressão Logística** com `class_weight='balanced'` e `random_state=42`: modelo leve, interpretável, sem GPU e sem deep learning. O `balanced` compensa classes pequenas (data e hora) e grandes (calendário).
+* **Limiar de confiança 0,35**, escolhido com validação e frases próprias, nunca com o teste. O limiar automático da validação (0,25) deixava passar frases fora do escopo, e 0,30 ainda aceitava "qual é a raiz quadrada de 144?". Custo do 0,35: menos cobertura (na validação, 93,4% → 91,0%).
+* **E-mail mantido:** F1 de 0,950 na validação, muito acima do limite de 0,80 definido como regra de saída.
+* **Divisão dos dados respeitada:** treino ajusta, validação orienta o limiar e o **teste é usado uma única vez**, para medir.
+* **Motor separado da interface:** nenhuma lógica de PLN dentro da página Streamlit, no mesmo padrão dos outros trabalhos.
+
+### Limitações
+
+* A localização para pt-BR foi feita por um **LLM**, é **parcial** (cerca de 40% das frases são idênticas ao português de Portugal) e ainda tem **resíduos de português europeu**, erros pontuais de tradução e frases truncadas. Não é tradução humana.
+* O corpus tem muitas frases parecidas entre si (só as idênticas foram removidas), então o desempenho em frases realmente novas pode ser menor que o medido no teste.
+* O modelo só conhece **9 domínios**; o "não entendi" depende de um limiar e não é perfeito para qualquer frase fora do escopo (testado com apenas 6 frases fora do escopo).
+* Não há contexto de conversa, geração de texto nem execução de ações: é apenas a etapa de NLU.
+
+### Reproduzir o recorte e testar no terminal
+
+```bash
+# 1) Baixe o dataset Magurofg/massive-pt-br (Hugging Face) para ~/dados/massive-pt-br
+#    (train.jsonl, validation.jsonl e test.jsonl) e gere o CSV recortado:
+python scripts/prepare_intent_dataset.py
+
+# 2) F1 por classe na validação e teste com frases dentro e fora do escopo:
+python scripts/testar_intencoes.py
+```
+
+O app em si **não precisa** do dataset original: ele usa apenas o CSV já versionado em `data/intent_assistant/`.
+
+### Dataset, licença e citação
+
+O dataset **massive-pt-br** é distribuído sob a licença **[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)**. Aqui ele foi **modificado**: filtrado para 9 domínios, normalizado em Unicode e sem frases duplicadas ou repetidas entre treino e validação/teste.
+
+FITZGERALD, Jack et al. MASSIVE: a 1M-example multilingual natural language understanding dataset with 51 typologically-diverse languages. In: ANNUAL MEETING OF THE ASSOCIATION FOR COMPUTATIONAL LINGUISTICS, 61., 2023. **Proceedings** [...]. Volume 1: Long Papers. ACL, 2023. arXiv:2204.08582.
+
+MAGUROFG. **massive-pt-br**: localização brasileira do MASSIVE. Hugging Face, [s.d.]. Disponível em: https://huggingface.co/datasets/Magurofg/massive-pt-br. Licença CC BY 4.0. Acesso em: 25 out. 2026.
+
 ## 🚀 Como Executar Localmente
 
 **1. Clone o repositório:**
 ```bash
-git clone https://github.com/SEU_USUARIO/nlp-morphosyntactic-analyzer.git
+git clone https://github.com/A-Capelini/nlp-morphosyntactic-analyzer.git
 cd nlp-morphosyntactic-analyzer
 ```
 
@@ -110,6 +216,8 @@ python -m venv venv
 source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate     # Windows
 ```
+
+> Quem usa **conda** pode criar o ambiente com o conda e instalar primeiro pelo `conda-forge` (`conda install -c conda-forge streamlit nltk scikit-learn pandas unidecode`), recorrendo ao `pip` só para o que não existir lá (ex.: `svgling`, se for o caso).
 
 **3. Instale as dependências:**
 ```bash
