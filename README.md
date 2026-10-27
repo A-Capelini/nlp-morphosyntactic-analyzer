@@ -29,15 +29,17 @@ Aplicação interativa em Python para a disciplina de Processamento de Linguagem
 ├── intent_engine/                      # Motor do Assistente de Intenções (independente dos demais; sem Streamlit)
 │   ├── preprocess.py                   # Limpeza do texto (a mesma função no treino e na entrada do usuário)
 │   ├── model.py                        # TF-IDF + Regressão Logística, limiar de confiança e prever()
+│   ├── rules_baseline.py               # Baseline por regras (palavras-chave, estilo ELIZA), só para comparação
 │   ├── responses.py                    # Nomes de exibição, respostas simuladas e mensagem "não entendi"
-│   └── evaluate.py                     # Avaliação no split de teste e frases próprias
+│   └── evaluate.py                     # Avaliação no split de teste, baseline por regras e frases próprias
 ├── data/intent_assistant/
 │   └── massive_ptbr_subset.csv         # Recorte do MASSIVE pt-BR (versionado; o app não baixa nada)
 ├── scripts/
 │   ├── prepare_intent_dataset.py       # Gera o CSV a partir do dataset baixado (uso único)
 │   └── testar_intencoes.py             # Teste no terminal: F1 na validação e frases dentro/fora do escopo
 ├── docs/intent_assistant/
-│   └── PROGRESSO.md                    # Registro de andamento do trabalho do assistente
+│   ├── PROGRESSO.md                    # Registro de andamento do trabalho do assistente
+│   └── ROTEIRO_APRESENTACAO.md         # Roteiro da demonstração ao vivo
 ├── setup/
 │   └── environment.yml                 # Ambiente conda para rodar localmente (fora da raiz de propósito; ver "Como Executar")
 ├── requirements.txt                    # Dependências do deploy (Streamlit Community Cloud)
@@ -136,13 +138,14 @@ O usuário digita uma frase em português (ex.: *"acorde-me às sete da manhã"*
 
 * **`preprocess.py`:** função `preprocessar()`, a **mesma** no treino e na frase digitada. As stopwords são uma lista própria e curta (sem baixar dados do NLTK, que falha no Streamlit Cloud), mantendo palavras que carregam intenção ("hoje", "amanhã", "não", "para"...). As palavras de ativação do dataset (*olly*, *alexa*, *siri*, *ei*, *hei*) também viram stopwords, para o modelo não usar "alexa" como atalho para casa inteligente.
 * **`model.py`:** `treinar()` ajusta o modelo só com o treino (a validação serve para estudar o limiar); `prever(texto)` devolve `dominio`, `confianca`, `top3` e `entendeu`. Sem Streamlit.
+* **`rules_baseline.py`:** baseline por **regras**, no estilo ELIZA/A.L.I.C.E. (slide 4): cada domínio tem uma lista curta de radicais de palavras-chave, e vence o domínio com mais palavras casadas; sem palavra-chave conhecida, não responde. Serve **só para comparação**: não é usado pelo assistente principal.
 * **`responses.py`:** nome de exibição e resposta simulada de cada domínio, e a mensagem de "não entendi".
-* **`evaluate.py`:** o **único** lugar que lê o split de teste. Calcula acurácia, F1 macro, relatório por classe, matriz de confusão, erros mais comuns e roda 18 frases próprias (12 dentro do escopo e 6 fora). A página só exibe os resultados.
+* **`evaluate.py`:** o **único** lugar que lê o split de teste. Calcula acurácia, F1 macro, relatório por classe, matriz de confusão, erros mais comuns, avalia o baseline por regras e roda 18 frases próprias (12 dentro do escopo e 6 fora). A página só exibe os resultados.
 
 ### A página `4_🤖_Assistente_Intencoes.py`
 
-* **Aba "Assistente":** campo de texto, 6 exemplos clicáveis (um deles fora do escopo), histórico da conversa em `st.session_state` (o mais recente no topo), domínio previsto com nome de exibição, barra de confiança, resposta simulada, top-3 e o aviso de "não entendi".
-* **Aba "Sobre o modelo":** métricas no conjunto de teste, interpretação em texto curto, tabela por classe, matriz de confusão, erros mais comuns, erros de maior confiança e as frases próprias.
+* **Aba "Assistente":** campo de texto, 6 exemplos clicáveis (um deles fora do escopo), histórico da conversa em `st.session_state` (o mais recente no topo), domínio previsto com nome de exibição, barra de confiança, resposta simulada, top-3 e o aviso de "não entendi". Um interruptor "Comparar com as regras (estilo ELIZA)", desligado por padrão, mostra o que o baseline responderia à mesma frase.
+* **Aba "Sobre o modelo":** métricas no conjunto de teste, interpretação em texto curto, comparação regras × modelo, tabela por classe, matriz de confusão, erros mais comuns, erros de maior confiança, tabela de limiar × cobertura × precisão (calculada na validação) e as frases próprias.
 * **Barra lateral:** domínios, dataset, licença, limiar em uso e as limitações.
 * **Cache:** o modelo é treinado uma vez por servidor com `st.cache_resource`, e a avaliação roda uma vez com `st.cache_data`.
 
@@ -167,11 +170,26 @@ O usuário digita uma frase em português (ex.: *"acorde-me às sete da manhã"*
 * **Validação × teste:** acurácia 0,934 → 0,937 e F1 macro 0,927 → 0,929, sem sinal de sobreajuste.
 * **18 frases próprias:** 18 de 18 corretas (12 dentro do escopo com confiança mínima de 0,58 e 6 fora do escopo no "não entendi"). Esse resultado **não mede generalização**: o limiar 0,35 foi ajustado olhando uma dessas frases ("qual é a raiz quadrada de 144?", confiança 0,34). A medida honesta é o conjunto de teste.
 
+### Regras (estilo ELIZA) × modelo
+
+Mesmo conjunto de teste. Na acurácia, frase sem resposta conta como erro.
+
+| Método | Acurácia | F1 macro | Cobertura | Precisão nas respondidas |
+|---|---|---|---|---|
+| Regras por palavras-chave | 73,9% | 0,811 | 79,6% | 92,9% |
+| Modelo sem limiar (responde sempre) | 93,7% | 0,929 | 100,0% | 93,7% |
+| Modelo com limiar 0,35 | 88,6% | — | 91,7% | 96,6% |
+
+* **As regras, quando respondem, acertam bastante (92,9%)**, mas deixam cerca de 20% das frases sem resposta por não encontrarem nenhuma palavra-chave (sinônimos, outros jeitos de pedir). O modelo com limiar responde a mais frases (91,7% × 79,6%) e acerta mais delas (96,6% × 92,9%).
+* **O modelo com limiar tem acurácia menor que o modelo sem limiar** (88,6% × 93,7%) porque o "não entendi" conta como erro nessa coluna: o limiar troca cobertura por precisão.
+* **Ressalva:** as regras foram escritas a partir do conhecimento dos domínios, sem consultar o conjunto de teste, e **não foram otimizadas**; com mais esforço manual elas melhorariam. A comparação é ilustrativa, não uma medida definitiva.
+
 ### Decisões técnicas
 
 * **Classificação por domínio** (9 classes) em vez das 60 intenções: tarefa mais simples, fácil de demonstrar e de explicar.
 * **TF-IDF + Regressão Logística** com `class_weight='balanced'` e `random_state=42`: modelo leve, interpretável, sem GPU e sem deep learning. O `balanced` compensa classes pequenas (data e hora) e grandes (calendário).
-* **Limiar de confiança 0,35**, escolhido com validação e frases próprias, nunca com o teste. O limiar automático da validação (0,25) deixava passar frases fora do escopo, e 0,30 ainda aceitava "qual é a raiz quadrada de 144?". Custo do 0,35: menos cobertura (na validação, 93,4% → 91,0%).
+* **Limiar de confiança 0,35**, escolhido com validação e frases próprias, nunca com o teste. O limiar automático da validação (0,25) deixava passar frases fora do escopo, e 0,30 ainda aceitava "qual é a raiz quadrada de 144?". Custo do 0,35: menos cobertura (na validação, 93,4% → 91,0%). A tabela de limiares fica visível na aba "Sobre o modelo".
+* **Baseline por regras** para dar ao argumento "regras (slide 4) → aprendizado (slide 5)" um número, em vez de só afirmá-lo. Não altera o modelo nem as métricas dele.
 * **E-mail mantido:** F1 de 0,950 na validação, muito acima do limite de 0,80 definido como regra de saída.
 * **Divisão dos dados respeitada:** treino ajusta, validação orienta o limiar e o **teste é usado uma única vez**, para medir.
 * **Motor separado da interface:** nenhuma lógica de PLN dentro da página Streamlit, no mesmo padrão dos outros trabalhos.
@@ -182,6 +200,7 @@ O usuário digita uma frase em português (ex.: *"acorde-me às sete da manhã"*
 * O corpus tem muitas frases parecidas entre si (só as idênticas foram removidas), então o desempenho em frases realmente novas pode ser menor que o medido no teste.
 * O modelo só conhece **9 domínios**; o "não entendi" depende de um limiar e não é perfeito para qualquer frase fora do escopo (testado com apenas 6 frases fora do escopo).
 * Não há contexto de conversa, geração de texto nem execução de ações: é apenas a etapa de NLU.
+* O baseline por regras não foi otimizado e serve só como ponto de comparação.
 
 ### Reproduzir o recorte e testar no terminal
 
@@ -207,49 +226,4 @@ MAGUROFG. **massive-pt-br**: localização brasileira do MASSIVE. Hugging Face, 
 
 ## 🚀 Como Executar Localmente
 
-Testado com **Python 3.10** (ambiente conda local) e **Python 3.14** (Streamlit Community Cloud).
-
-**1. Clone o repositório:**
-```bash
-git clone https://github.com/A-Capelini/nlp-morphosyntactic-analyzer.git
-cd nlp-morphosyntactic-analyzer
-```
-
-### Opção 1 — conda (recomendada)
-
-Os pacotes vêm primeiro do **conda-forge**; o `pip` só entra para o que não existe nos canais conda (hoje, apenas o `svgling`). Tudo está descrito em `setup/environment.yml`:
-
-```bash
-conda env create -f setup/environment.yml
-conda activate nlp-analyzer
-streamlit run app.py
-```
-
-Para atualizar um ambiente já existente depois de mudar o arquivo:
-
-```bash
-conda env update -n nlp-analyzer -f setup/environment.yml --prune
-```
-
-> **Por que o `environment.yml` fica em `setup/` e não na raiz:** o Streamlit Community Cloud usa o primeiro arquivo de dependência que encontra na pasta do `app.py` ou na raiz, com prioridade do `environment.yml` sobre o `requirements.txt`. Em `setup/` ele não é detectado, e o deploy continua usando o `requirements.txt`. Ao mudar uma dependência, atualize os dois arquivos.
-
-### Opção 2 — venv + pip
-
-**2.1. Crie e ative um ambiente virtual:**
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
-```
-
-**2.2. Instale as dependências:**
-```bash
-pip install -r requirements.txt
-```
-
-**2.3. Rode a aplicação:**
-```bash
-streamlit run app.py
-```
-
-Em qualquer das opções, a aplicação abre automaticamente em `http://localhost:8501`, com a página inicial listando os trabalhos disponíveis no menu lateral.
+Testado com **Python 3.10** (ambiente conda local) e **Python
