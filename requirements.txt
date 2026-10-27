@@ -1,5 +1,9 @@
+# Dependências do DEPLOY (Streamlit Community Cloud, Python 3.14).
+# Para rodar localmente, prefira setup/environment.yml (conda); mantenha os dois em sincronia.
+# nltk fixado em 3.9.4: com a 3.10.4 o "import nltk" falha no Python 3.14 do Cloud
+# (AttributeError em nltk.data.path). A 3.9.4 declara suporte ao Python 3.14.
 streamlit
-nltk
+nltk==3.9.4
 svgling
 scikit-learn
 pandas
