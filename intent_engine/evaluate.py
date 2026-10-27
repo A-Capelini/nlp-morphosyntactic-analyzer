@@ -1,14 +1,17 @@
 """
-Avaliação do modelo no split de TESTE (Etapa 4).
+Avaliação no split de TESTE (Etapa 4) e do baseline por regras.
 
 Este é o ÚNICO lugar que lê o split 'test'. As funções devolvem tabelas
 (DataFrames) e números; quem desenha na tela é a página Streamlit.
 Regra: nada aqui deve ser usado para ajustar o modelo ou o limiar.
+O baseline por regras também aceita o split 'validation' (para ajustar as
+palavras-chave sem tocar no teste).
 """
 import pandas as pd
 from sklearn.metrics import accuracy_score, classification_report, f1_score
 
 from intent_engine.model import ARQ_CSV, prever, treinar
+from intent_engine.rules_baseline import prever_regras
 
 # Frases próprias (esperado = None significa FORA DO ESCOPO: deve cair no "não entendi").
 # Substitua/complete com frases suas.
@@ -90,6 +93,37 @@ def avaliar_teste(modelo=None):
             "cobertura": cobertura, "precisao_aceitas": precisao_aceitas,
             "por_classe": por_classe, "matriz": matriz,
             "pares_erro": pares_erro, "erros_confiantes": erros_confiantes}
+
+
+def avaliar_baseline(split="test"):
+    """Avalia o baseline por regras (palavras-chave) em um split ('test' ou 'validation').
+
+    Frase sem palavra-chave reconhecida = "nenhum": conta como ERRO na acurácia
+    e no F1, mas não entra na precisão das frases respondidas."""
+    df = pd.read_csv(ARQ_CSV)
+    dados = df[df["split"] == split].reset_index(drop=True)
+    classes = sorted(dados["dominio"].unique())
+
+    previsto = pd.Series([prever_regras(t)["dominio"] or "nenhum" for t in dados["texto"]])
+    real = dados["dominio"]
+
+    respondidas = previsto != "nenhum"
+    acuracia = float((previsto == real).mean())
+    f1_macro = float(f1_score(real, previsto, labels=classes, average="macro", zero_division=0))
+    cobertura = float(respondidas.mean())
+    precisao = float((previsto[respondidas] == real[respondidas]).mean()) if respondidas.any() else 0.0
+
+    # Relatório por classe (só as 9 classes reais; "nenhum" não é uma classe)
+    rel = pd.DataFrame(
+        classification_report(real, previsto, labels=classes, output_dict=True, zero_division=0)
+    ).T
+    por_classe = rel.loc[classes, ["precision", "recall", "f1-score", "support"]].copy()
+    por_classe["support"] = por_classe["support"].astype(int)
+    por_classe = por_classe.round(3).sort_values("f1-score")
+
+    return {"split": split, "n": len(dados), "acuracia": acuracia, "f1_macro": f1_macro,
+            "cobertura": cobertura, "precisao_respondidas": precisao,
+            "por_classe": por_classe}
 
 
 def avaliar_frases_proprias():
